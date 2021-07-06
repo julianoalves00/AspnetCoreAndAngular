@@ -24,6 +24,12 @@ namespace API.Controllers
             _tokenService = tokenService;
         }
 
+        [HttpGet("isonline")]
+        public ActionResult<bool> IsOnline()
+        {
+            return Ok(true);
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
