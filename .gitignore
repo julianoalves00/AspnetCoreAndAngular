@@ -60,6 +60,7 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 appsettings.json
+datingapp.db
 artifacts/
 
 # StyleCop
