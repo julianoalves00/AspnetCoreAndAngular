@@ -35,10 +35,7 @@ export class ErrorInterceptor implements HttpInterceptor {
                 else
                   this.toastr.error(error.statusText, error.status);
               } else {
-                if(error.statusText = 'OK')
-                  this.toastr.error('Bad Request', error.status);
-                else
-                  this.toastr.error(error.statusText, error.status);
+                this.toastr.error(error.error, error.status);
               }
               break;
             case 401:
