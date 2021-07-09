@@ -1,10 +1,7 @@
 ﻿using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -12,26 +9,49 @@ namespace API.Data
 {
     public class Seed
     {
-        public static async Task SeedUser(DataContext context)
+        public static async Task SeedUser(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
-            if (await context.Users.AnyAsync())
+            if (await userManager.Users.AnyAsync())
                 return;
 
+            // Read seed users file
             var userData = await System.IO.File.ReadAllTextAsync("Data/UserSeedData.json");
             var users = JsonSerializer.Deserialize<List<AppUser>>(userData);
 
-            foreach(var user in users)
+            if (users == null)
+                return;
+
+            // Create roles
+            var roles = new List<AppRole>
             {
-                using var hmac = new HMACSHA512();
+                new AppRole{ Name = Constants.ROLE_MEMBER},
+                new AppRole{ Name = Constants.ROLE_ADMIN},
+                new AppRole{ Name = Constants.ROLE_MODERATOR}
+            };
 
-                user.UserName = user.UserName.ToLower();
-                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Test123#"));
-                user.PasswordSalt = hmac.Key;
 
-                context.Users.Add(user);
+            foreach(var role in roles)
+            {
+                await roleManager.CreateAsync(role);
             }
 
-            await context.SaveChangesAsync();
+            // Create admin user
+            var admin = new AppUser
+            {
+                UserName = Constants.ADMIN_USER
+            };
+
+            await userManager.CreateAsync(admin, Constants.DEFAULT_PASSWORD);
+            await userManager.AddToRolesAsync(admin, new[] { Constants.ROLE_ADMIN, Constants.ROLE_MODERATOR });
+
+            // Create seed users
+            foreach (var user in users)
+            {
+                user.UserName = user.UserName.ToLower();
+
+                await userManager.CreateAsync(user, Constants.DEFAULT_PASSWORD);
+                await userManager.AddToRoleAsync(user, Constants.ROLE_MEMBER);
+            }
         }
     }
 }
