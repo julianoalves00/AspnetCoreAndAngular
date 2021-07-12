@@ -42,7 +42,7 @@ namespace API.Controllers
             if(userLike != null)
                 return BadRequest("You allready like this user");
 
-            userLike = new UserLike { SourceUserID = sourceUser.Id, LikeUserID = likedUser.Id};
+            userLike = new UserLike { SourceUserId = sourceUser.Id, LikedUserId = likedUser.Id};
 
             sourceUser.LikedUsers.Add(userLike);
 
